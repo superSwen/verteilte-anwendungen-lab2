@@ -5,7 +5,7 @@ Currently, the frontend is not working correctly due to a missing websocket conn
 
 ## Websocket Connection - What to Implement
 Das Frontend besitzt bereits alle notwendigen Komponenten, um eine Websocket-Verbindung herzustellen und Daten in Echtzeit zu empfangen.
-Aus diesem Grund, muss sich bei der Implementierung der Websocket-Verbindung im Backend auf die bereits bestehenden Schnittstellen und Datenformate abgestimmt werden.
+Aus diesem Grund muss die Backend-Implementierung der Websocket-Verbindung auf die bereits bestehenden Schnittstelle und dessen Datenformate im Frontend abgestimmt werden.
 Stellen Sie sicher, dass die Websocket-Verbindung folgende Anforderungen erfüllt:
 - **Endpoint**: Der Websocket-Server muss unter dem Pfad erreichbar sein, welchen Sie in Ihrer .env.local Datei unter VITE_WS_URL konfiguriert haben.
 - **Datenformat**: Die gesendeten und empfangenen Nachrichten müssen dem in der Frontend-Dokumentation beschriebenen Format entsprechen. Sie finden die entsprechenden Typendefinitionen in der Datei `frontend/src/types/trading.ts`. Außerdem sollten Sie sich an der bestehenden Implementierung in der Datei `frontend/src/services/ws.ts` orientieren.

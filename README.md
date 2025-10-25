@@ -1,11 +1,11 @@
 # Verteilte Anwendungen Übungsaufgabe 2
 
-Mögliche Punktzahl: 20 Punkte
+Mögliche Punktzahl: 10 Punkte
 
 ## Deadlines
 
-- 1. Zug: 
-- 2. Zug: 
+- 1. Zug: 27.11.2025
+- 2. Zug: 27.11.2025
 
 ## Aufgabenstellung
 In dieser Aufgabe erhalten Sie ein vorkonfiguriertes Projekt, das aus zwei Komponenten besteht:
@@ -13,21 +13,25 @@ In dieser Aufgabe erhalten Sie ein vorkonfiguriertes Projekt, das aus zwei Kompo
 - **Frontend:** Eine Single-Page-Application programmiert mit Vue.js
 - **Backend:** Eine Quarkus Applikation, die Daten für das Frontend bereitstellt
 
-Das Frontend ist bereits vollständig implementiert und muss nicht verändert werden. Das Backend hingegen ist nur teilweise implementiert und soll im Rahmen dieser Übungsaufgabe erweitert werden.
-Ziel dieser Übung ist es, dass Sie ein tiefes Verständnis für Websocket-Kommunikation, sowohl Client- als auch Serverseitig, erlangen. Außerdem soll Ihnen diese Übung zusätzliche Erfahrung im Umgang mit Quarkus vermitteln, indem verschiedene Pattern und Konzepte mithilfe des Jakarta EE Standards umgesetzt werden.
-Dazu ist Ihre Aufgabe eine kleine Trading-Applikation zu implementieren, die es ermöglicht, Aktienkurse in Echtzeit zu verfolgen. In dieser Übung gibt es KEINE Datenbank und KEINE Rest-API. Die gesamte Kommunikation zwischen Frontend und Backend erfolgt über Websockets.
+Das Frontend ist bereits vollständig implementiert und muss nicht verändert werden. Das Backend hingegen ist nur teilweise implementiert
+und soll im Rahmen dieser Übungsaufgabe erweitert werden.
+Ziel dieser Übung ist es, dass Sie ein tiefes Verständnis für Websocket-Kommunikation, sowohl Client- als auch Serverseitig, erlangen.
+Außerdem soll Ihnen diese Übung zusätzliche Erfahrung im Umgang mit Quarkus vermitteln, indem verschiedene Pattern und Konzepte
+des Jakarta EE Standards umgesetzt werden.
+Ihre Aufgabe ist die Entwicklung einer Trading-Applikation, die es ermöglicht, Aktienkurse in Echtzeit zu verfolgen.
+In dieser Übung gibt es KEINE Datenbank und KEINE Rest-API. Die gesamte Kommunikation zwischen Frontend und Backend erfolgt über Websockets.
 
 Das Backend ist im wesentlichen in zwei Teile gegliedert:
 1. **Boundary:** Diese Schicht stellt die Kommunikation mit dem Frontend, sowie mit externen Diensten sicher. Hierzu zählen die Websocket-Endpunkte, sowohl als Server, als auch als Client. Sie finden hier bereits alle notwendigen Dateien. Einige der Dateien sind allerdings nur teilweise implementiert und müssen von Ihnen vervollständigt werden.
-2. **Trading:** Diese Schicht stellt die Geschäftslogik der Applikation dar. Hier werden die Aktienkurse verwaltet und aktualisiert. Diese Schicht ist im wesentlichen bereits vollständig implementiert. Sie müssen hier nur wenige Änderungen vornehmen, um die Aufgabe komplett zu lösen.
+2. **Trading:** Diese Schicht stellt die Geschäftslogik der Applikation dar. Hier werden die Aktienkurse verwaltet und aktualisiert. Diese Schicht ist im Wesentlichen bereits vollständig implementiert. Sie müssen hier nur wenige Änderungen vornehmen, um die Aufgabe komplett zu lösen.
 
 ## Aufgabenstellung
-1. (4P) Ihnen ist sicherlich aufgefallen, dass das Frontend aktuell keine Verbindung zum Backend aufbauen kann. Dies liegt daran, dass der Websocket-Endpunkt im Backend noch nicht implementiert ist. Implementieren Sie den Websocket-Server-Endpunkt in der Klasse `WebsocketServer.java` so, dass das Frontend eine Verbindung herstellen kann. Orientieren Sie sich hierzu am Frontend-Code. Sie finden dort die erwarteten Datenformate und Message-Definitionen. Nutzen Sie die bereits vorhandenen Methoden aus dem `WebsocketServer`.
-2. (8P) Nachdem Sie das Frontend erfolgreich mit dem Backend verbunden haben, und dieses nun Aktienkurse abonnieren kann, müssen Sie sich als nächstes darum kümmern, dass das Backend auch tatsächlich Aktienkurse empfängt und an die Clients weiterleitet. Implementieren Sie hierzu den Websocket-Client. Dazu stehen Ihnen die Dateien `QuoteClient.java` und `QuoteController.java` zur Verfügung.
+1. (2P) Ihnen ist sicherlich aufgefallen, dass das Frontend aktuell keine Verbindung zum Backend aufbauen kann. Dies liegt daran, dass der Websocket-Endpunkt im Backend noch nicht implementiert ist. Implementieren Sie den Websocket-Server-Endpunkt in der Klasse `WebsocketServer.java`, sodass das Frontend eine Verbindung herstellen kann. Orientieren Sie sich hierzu am Frontend-Code. Sie finden dort die erwarteten Datenformate und Message-Definitionen. Nutzen Sie die bereits vorhandenen Methoden aus dem `WebsocketServer`.
+2. (4P) Nachdem Sie das Frontend erfolgreich mit dem Backend verbunden haben, und dieses nun Aktienkurse abonnieren kann, müssen Sie sich als Nächstes darum kümmern, dass das Backend auch tatsächlich Aktienkurse empfängt und an die Clients weiterleitet. Implementieren Sie hierzu den Websocket-Client. Dazu stehen Ihnen die Dateien `QuoteClient.java` und `QuoteController.java` zur Verfügung.
 Um die Aktienkurse zu empfangen, brauchen Sie natürlich auch eine Verbindung zu einem externen Dienst. Glücklicherweise stellt uns [Stock3](stock3.com) in Zusammenarbeit mit [brokerize](brokerize.com) einen kostenlosen Websocket-Dienst zur Verfügung, über den Sie Echtzeit-Aktienkurse empfangen können.
 Die URL für den Websocket-Dienst lautet: `wss://quotepush.stock3.com/delta`. Weiter unten in dieser Datei finden Sie eine kurze Dokumentation, wie Sie den Dienst nutzen können. Nutzen Sie diese Informationen, um den Websocket-Client fertigzustellen.
-3. (4P) Nachdem Sie den Websocket-Client erfolgreich implementiert haben, sollten Sie in der Lage sein, Echtzeit-Aktienkurse zu empfangen und an die verbundenen Frontend-Clients weiterzuleiten. Ihnen ist vielleicht bereits aufgefallen, dass Sie zwar Candlesticks empfangen und betrachten können, der Kursticker im Frontend jedoch mit leeren Werten befüllt wird und Sie auch keine Line-Charts betrachten können. Dies liegt daran, dass Ihnen wichtige Bestandteile im `SimpleQuoteConsumer.java` fehlen. Vervollständigen Sie diese Klasse so, dass der Kursticker und die Line-Charts korrekt mit Daten befüllt werden. Nehmen Sie sich dazu ein Beispiel an der bereits implementierten `CandleQuoteConsumer.java`.
-4. (4P) Selbst der beste Code hat Fehler. Daher ist es wichtig, dass Sie Ihre Implementierung ausreichend testen. Schreiben Sie mindestens 3 Integration-Tests für den `WebsocketServer`, um die Funktionalität Ihres Websocket-Servers zu überprüfen. Schreiben Sie außerdem mindestens 3 Integration-Tests für den `QuoteClient`, um die Funktionalität Ihres Websocket-Clients zu überprüfen.
+3. (2P) Nachdem Sie den Websocket-Client erfolgreich implementiert haben, sollten Sie in der Lage sein, Echtzeit-Aktienkurse zu empfangen und an die verbundenen Frontend-Clients weiterzuleiten. Ihnen ist vielleicht bereits aufgefallen, dass Sie zwar Candlesticks empfangen und betrachten können, der Kursticker im Frontend jedoch mit leeren Werten befüllt wird und Sie auch keine Line-Charts betrachten können. Dies liegt daran, dass Ihnen wichtige Bestandteile im `SimpleQuoteConsumer.java` fehlen. Vervollständigen Sie diese Klasse so, dass der Kursticker und die Line-Charts korrekt mit Daten befüllt werden. Nehmen Sie sich dazu ein Beispiel an der bereits implementierten `CandleQuoteConsumer.java`.
+4. (2P) Selbst der beste Code hat Fehler. Daher ist es wichtig, dass Sie Ihre Implementierung ausreichend testen. Schreiben Sie mindestens 3 Integration-Tests für den `WebsocketServer`, um die Funktionalität Ihres Websocket-Servers zu überprüfen. Schreiben Sie außerdem mindestens 3 Integration-Tests für den `QuoteClient`, um die Funktionalität Ihres Websocket-Clients zu überprüfen.
 
 
 # Quarkus Get Started

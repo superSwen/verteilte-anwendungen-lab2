@@ -1,12 +1,8 @@
 package de.berlin.htw.boundary.ws.client;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
 import jakarta.websocket.ClientEndpoint;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +13,6 @@ import de.berlin.htw.trading.events.InitialQuoteEvent;
 import de.berlin.htw.trading.events.QuoteDeltaEvent;
 import de.berlin.htw.trading.quote.dto.DeltaQuote;
 import de.berlin.htw.trading.quote.dto.Quote;
-import de.berlin.htw.trading.quote.dto.QuoteMessage;
 import de.berlin.htw.trading.quote.dto.SymbolKey;
 
 import io.quarkus.scheduler.Scheduled;
@@ -61,7 +56,6 @@ public class QuoteClient {
         lastValue += (Math.random() - 0.5) * 100;
         DeltaQuote dq = new DeltaQuote(1, lastValue, 5L, 15L, null, null, null, null);
         quoteDeltaEvent.fireAsync(new QuoteDeltaEvent(dq));
-
     }
 
 }
