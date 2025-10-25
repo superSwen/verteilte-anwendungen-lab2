@@ -15,8 +15,8 @@ import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.websocket.Session;
 
-@ApplicationScoped
 @Startup
+@ApplicationScoped
 public class QuoteController {
 
     private Session session;
@@ -39,7 +39,7 @@ public class QuoteController {
         logger.info("QuoteController started.");
     }
 
-    private void subscribe(@Observes SubEvent ev) {
+    protected void subscribe(@Observes SubEvent ev) {
         if (this.subscriptions.add(ev.key())) {
             logger.infof("Subscribing to quotes for %s", ev.key());
             this.session.getAsyncRemote().sendText(ev.toMessage());
@@ -49,7 +49,7 @@ public class QuoteController {
 
     }
 
-    private void unsubscribe(@Observes UnsubEvent ev) {
+    protected void unsubscribe(@Observes UnsubEvent ev) {
         if (this.subscriptions.remove(ev.key())) {
             logger.infof("Unsubscribing from quotes for %s", ev.key());
             this.session.getAsyncRemote().sendText(ev.toMessage());

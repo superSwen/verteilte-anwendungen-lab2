@@ -23,11 +23,6 @@ import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
-import jakarta.websocket.server.ServerEndpoint;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnError;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 
 @ApplicationScoped
@@ -56,7 +51,7 @@ public class WebsocketServer {
 
     // TODO: IMPLEMENTIEREN SIE DIE METHODEN FÜR DEN WEBSOCKET-SERVER
 
-    private void unsubscribe(WsMsgs.Sub sub, Session session) {
+    void unsubscribe(WsMsgs.Sub sub, Session session) {
         SymbolKey key = toKey(sub);
         if (key == null)
             return;
@@ -161,6 +156,7 @@ public class WebsocketServer {
             return;
         try {
             String json = jsonb.toJson(obj);
+            logger.infov("Sending JSON over WebSocket: {0}", json);
             // TODO: Senden Sie die JSON-Nachricht an den Client über die WebSocket-Session
         } catch (Exception e) {
             e.printStackTrace();
