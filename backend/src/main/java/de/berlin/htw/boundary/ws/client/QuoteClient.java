@@ -44,7 +44,7 @@ public class QuoteClient {
         if (lastValue == null) {
 
             long currentTimeUnixInSeconds = System.currentTimeMillis() / 1000;
-            Quote q = new Quote(new SymbolKey("133962", "22", "last"), currentTimeUnixInSeconds, 12000.00, 12200.00,
+            Quote q = new Quote(new SymbolKey("133979", "98", "bid"), currentTimeUnixInSeconds, 12000.00, 12200.00,
                     11800.00, 11950.00,
                     11800.00,
                     200.00, 0.016949153, 0.01,
