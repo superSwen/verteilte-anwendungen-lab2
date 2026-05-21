@@ -14,6 +14,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.websocket.Session;
+import jakarta.websocket.ContainerProvider;
+import jakarta.websocket.WebSocketContainer;
+import java.net.URI;
+
 
 @Startup
 @ApplicationScoped
@@ -29,15 +33,22 @@ public class QuoteController {
     public void start() {
         logger.info("Starting QuoteController...");
         try {
-            // TODO: ERZEUGEN SIE EINE WEBSOCKET-SESSION MIT DEM QuoteClient UND VERBINDEN
-            // SIE SICH
+            // (1) Erstelle einen WebSocketContainer
+            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
+
+            // (2) Verbinde zum Stock3-Server mit dem QuoteClient
+            //     Der Container ruft automatisch die @OnOpen-Methode von QuoteClient auf
+            this.session = container.connectToServer(QuoteClient.class,
+                    URI.create("wss://quotepush.stock3.com/delta"));
+
+            logger.info("Successfully connected to Stock3 WebSocket server");
         } catch (Exception e) {
             logger.error("Failed to start QuoteController.", e);
             System.exit(1);
         }
-
         logger.info("QuoteController started.");
     }
+
 
     protected void subscribe(@Observes SubEvent ev) {
         if (this.subscriptions.add(ev.key())) {
