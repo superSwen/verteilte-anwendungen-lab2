@@ -23,8 +23,14 @@ import jakarta.enterprise.event.ObservesAsync;
 import jakarta.inject.Inject;
 import jakarta.json.bind.Jsonb;
 import jakarta.json.bind.JsonbBuilder;
+import jakarta.websocket.OnClose;
+import jakarta.websocket.OnError;
+import jakarta.websocket.OnMessage;
+import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
+import jakarta.websocket.server.ServerEndpoint;
 
+@ServerEndpoint("/quotes")
 @ApplicationScoped
 public class WebsocketServer {
 
@@ -49,7 +55,43 @@ public class WebsocketServer {
     @Inject
     Logger logger;
 
-    // TODO: IMPLEMENTIEREN SIE DIE METHODEN FÜR DEN WEBSOCKET-SERVER
+    @OnOpen
+    public void onOpen(Session session) {
+        sessions.put(session.getId(), session);
+        subs.put(session.getId(), new Subscription());
+        logger.infov("Client connected: {0}", session.getId());
+    }
+
+    @OnClose
+    public void onClose(Session session) {
+        sessions.remove(session.getId());
+        subs.remove(session.getId());
+        logger.infov("Client disconnected: {0}", session.getId());
+    }
+
+    @OnError
+    public void onError(Session session, Throwable throwable) {
+        logger.errorv("WebSocket error for session {0}: {1}", session.getId(), throwable.getMessage());
+        sessions.remove(session.getId());
+        subs.remove(session.getId());
+    }
+
+    @OnMessage
+    public void onMessage(String message, Session session) {
+        try {
+            WsMsgs.Sub msg = jsonb.fromJson(message, WsMsgs.Sub.class);
+            if ("subscribe".equals(msg.action)) {
+                subscribe(msg, session);
+            } else if ("unsubscribe".equals(msg.action)) {
+                unsubscribe(msg, session);
+            } else {
+                // Unbekannte Nachricht (z.B. { type: "ping" }) → mit Pong antworten
+                sendJson(session, new WsMsgs.Pong());
+            }
+        } catch (Exception e) {
+            logger.errorv("Error processing message from session {0}: {1}", session.getId(), e.getMessage());
+        }
+    }
 
     void unsubscribe(WsMsgs.Sub sub, Session session) {
         SymbolKey key = toKey(sub);
@@ -157,7 +199,7 @@ public class WebsocketServer {
         try {
             String json = jsonb.toJson(obj);
             logger.infov("Sending JSON over WebSocket: {0}", json);
-            // TODO: Senden Sie die JSON-Nachricht an den Client über die WebSocket-Session
+            session.getAsyncRemote().sendText(json);
         } catch (Exception e) {
             e.printStackTrace();
         }
