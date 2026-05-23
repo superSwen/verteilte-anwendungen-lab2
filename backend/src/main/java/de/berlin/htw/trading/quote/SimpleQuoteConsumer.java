@@ -54,12 +54,43 @@ public class SimpleQuoteConsumer extends AbstractReplayingConsumer {
 
     @Override
     protected void applyChanges(List<ChangeRecord> changes) {
+        logger.infof("SimpleQuoteConsumer received %d changes", changes.size());
 
         Set<SymbolKey> updatedKeys = ConcurrentHashMap.newKeySet();
 
         // TODO: Hier fehlt die Verarbeitung der eingehenden Kursänderungen
 
+        long minTs = (System.currentTimeMillis() / 1000)
+                - retention.getSeconds();
+
+        for (var change : changes) {
+            var qc = (IMarketDataBuffer.QuoteChange) change;
+
+            logger.infof("Processing quote change: key=%s quote=%s",
+                    qc.key(),
+                    qc.quote());
+
+            Deque<Quote> dq = series.computeIfAbsent(
+                    qc.key(),
+                    k -> new ConcurrentLinkedDeque<>()
+            );
+
+            dq.addLast(qc.quote());
+
+            while (!dq.isEmpty() && dq.peekFirst().tsUnixSec() < minTs) {
+                dq.pollFirst();
+            }
+
+            if (dq.isEmpty()) {
+                series.remove(qc.key(), dq);
+            }
+
+            last.put(qc.key(), qc.quote());
+            updatedKeys.add(qc.key());
+        }
+
         for (var key : updatedKeys) {
+            logger.infof("Firing QuoteEvent for key=%s", key);
             quoteEvent.fireAsync(new QuoteEvent(key));
         }
     }
@@ -67,7 +98,24 @@ public class SimpleQuoteConsumer extends AbstractReplayingConsumer {
     public List<Quote> getQuotes(SymbolKey key, Duration window) {
         // TODO: Implementieren Sie die Methode, um die Kursserie für das gegebene
         // SymbolKey und Zeitfenster zurückzugeben
-        return new ArrayList<>();
+
+        Deque<Quote> dq = series.get(key);
+
+        if (dq == null || dq.isEmpty()) {
+            return List.of();
+        }
+
+        long minTs = (System.currentTimeMillis() / 1000)
+                - window.getSeconds();
+
+        List<Quote> out = new ArrayList<>();
+
+        for (Quote q : dq) {
+            if (q.tsUnixSec() >= minTs) {
+                out.add(q);
+            }
+        }
+        return out;
     }
 
     public Quote getLast(SymbolKey key) {
