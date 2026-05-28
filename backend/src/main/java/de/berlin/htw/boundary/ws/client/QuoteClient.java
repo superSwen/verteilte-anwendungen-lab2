@@ -16,7 +16,6 @@ import de.berlin.htw.trading.quote.dto.Quote;
 import de.berlin.htw.trading.quote.dto.SymbolKey;
 import jakarta.enterprise.event.Event;
 import jakarta.inject.Inject;
-import io.quarkus.scheduler.Scheduled;
 
 @ClientEndpoint
 public class QuoteClient {
@@ -42,7 +41,7 @@ public class QuoteClient {
     }
 
     @OnMessage
-    public void onMessage(String message, Session session) {
+    public void onMessage(String message) {
         try {
             if (message.startsWith("[stock3-")) {
                 logger.debug("Ignoring welcome message from Stock3");
@@ -51,8 +50,7 @@ public class QuoteClient {
 
             if (message.startsWith("{")) {
                 handleInitialQuote(message);
-            }
-            else {
+            } else {
                 handleDeltaMessage(message);
             }
         } catch (Exception e) {
@@ -65,30 +63,30 @@ public class QuoteClient {
         logger.error("WebSocket error: " + throwable.getMessage(), throwable);
     }
 
-
     private void handleInitialQuote(String jsonMessage) throws Exception {
-
-
         Map<String, Object> data = MAPPER.readValue(jsonMessage, Map.class);
 
-        // Extrahiere die Felder
-        Double q = ((Number) data.get("q")).doubleValue();           // aktueller Kurs
-        Double h = ((Number) data.get("h")).doubleValue();           // Tageshoch
-        Double l = ((Number) data.get("l")).doubleValue();           // Tagestief
-        Double pc = ((Number) data.get("pc")).doubleValue();         // Vortageskurs
-        Double o = ((Number) data.get("o")).doubleValue();           // Eröffnungskurs
-        Long ts = ((Number) data.get("ts")).longValue();             // Zeitstempel (Sekunden)
-        Long t = ((Number) data.get("t")).longValue();               // Ticknummer
+        Double q = ((Number) data.get("q")).doubleValue();
+        Double h = ((Number) data.get("h")).doubleValue();
+        Double l = ((Number) data.get("l")).doubleValue();
+        Double pc = ((Number) data.get("pc")).doubleValue();
+        Double o = ((Number) data.get("o")).doubleValue();
+        Long ts = ((Number) data.get("ts")).longValue();
+        Long t = ((Number) data.get("t")).longValue();
         Double tickSize = ((Number) data.get("tickSize")).doubleValue();
         Integer precision = ((Number) data.get("precision")).intValue();
-        Double abs = ((Number) data.get("abs")).doubleValue();       // abs. Änderung zum Vortag
-        Double rel = ((Number) data.get("rel")).doubleValue();       // rel. Änderung zum Vortag
+        Double abs = ((Number) data.get("abs")).doubleValue();
+        Double rel = ((Number) data.get("rel")).doubleValue();
         Boolean active = (Boolean) data.get("active");
-        Integer subId = ((Number) data.get("i")).intValue();         // Subscription-ID
-        String symbolStr = (String) data.get("s");                   // Symbol-String (z.B. "133962:22:last")
+        Integer subId = ((Number) data.get("i")).intValue();
+        String symbolStr = (String) data.get("s");
 
-        SymbolKey key = parseSymbolKey(symbolStr);
-        if (key == null) return;
+        String[] parts = symbolStr.split(":");
+        if (parts.length < 3) {
+            logger.warn("Invalid symbol string: " + symbolStr);
+            return;
+        }
+        SymbolKey key = new SymbolKey(parts[0], parts[1], parts[2]);
 
         subMap.put(subId, key);
 
@@ -99,24 +97,8 @@ public class QuoteClient {
     }
 
     private void handleDeltaMessage(String deltaMessage) {
-
-
         DeltaQuote deltaQuote = DeltaQuote.parse(deltaMessage);
-
-        logger.debugf("Delta message: subId=%d, price=%.4f",
-            deltaQuote.subId(), deltaQuote.value());
-
+        logger.debugf("Delta message: subId=%d, price=%.4f", deltaQuote.subId(), deltaQuote.value());
         quoteDeltaEvent.fireAsync(new QuoteDeltaEvent(deltaQuote));
     }
-
-
-    private SymbolKey parseSymbolKey(String symbolStr) {
-        String[] parts = symbolStr.split(":");
-        if (parts.length < 3) {
-            logger.warn("Invalid symbol string: " + symbolStr);
-            return null;
-        }
-        return new SymbolKey(parts[0], parts[1], parts[2]);
-    }
-
 }
